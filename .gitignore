@@ -1,0 +1,12 @@
+# Raw camera files
+assets/**/*.ARW
+assets/**/*.arw
+
+# Large video files
+assets/videos/
+
+# Claude Code internal
+.claude/
+
+# Node
+node_modules/
