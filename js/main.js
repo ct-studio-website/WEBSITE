@@ -123,10 +123,20 @@ document.addEventListener('DOMContentLoaded', function() {
             item.addEventListener('click', function() {
                 const img = this.querySelector('img');
                 if (img) {
+                    // Show thumbnail immediately so lightbox isn't blank
                     lightboxImage.src = img.src;
                     lightboxImage.alt = img.alt;
                     lightbox.classList.add('active');
                     document.body.style.overflow = 'hidden';
+
+                    // Swap to full-res once loaded
+                    if (img.dataset.full) {
+                        const fullImg = new Image();
+                        fullImg.onload = function() {
+                            lightboxImage.src = img.dataset.full;
+                        };
+                        fullImg.src = img.dataset.full;
+                    }
                 }
             });
         });
