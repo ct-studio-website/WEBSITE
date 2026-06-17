@@ -10,3 +10,10 @@ assets/videos/
 
 # Node
 node_modules/
+
+# Editor
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
