@@ -269,8 +269,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // ===== Image Error Handling =====
     document.querySelectorAll('img').forEach(function(img) {
         img.addEventListener('error', function() {
-            // Skip if already processed or is logo with text fallback
-            if (this.dataset.errorHandled || this.closest('.header__logo, .hero__logo')) {
+            // Skip if already processed, a logo with text fallback, or a
+            // lightbox/modal image (its src is intentionally cleared on close,
+            // which fires a spurious error event we must not act on).
+            if (this.dataset.errorHandled || this.closest('.header__logo, .hero__logo, .lightbox, .video-modal')) {
                 return;
             }
 
