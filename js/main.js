@@ -81,6 +81,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 photoItems.forEach(function(item) {
                     if (filter === 'all' || item.dataset.category === filter) {
                         item.classList.remove('hidden');
+                        // Force-load images that haven't loaded yet (lazy images off-screen)
+                        var img = item.querySelector('img');
+                        if (img && (!img.complete || img.naturalWidth === 0)) {
+                            img.setAttribute('loading', 'eager');
+                            var s = img.src; img.src = ''; img.src = s;
+                        }
                     } else {
                         item.classList.add('hidden');
                     }

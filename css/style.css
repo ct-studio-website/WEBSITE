@@ -463,6 +463,8 @@ main {
   cursor: pointer;
   overflow: hidden;
   border-radius: 4px;
+  background-color: #e8e6e1;
+  min-height: 180px;
   transition:
     opacity 0.4s ease,
     transform 0.4s ease;
