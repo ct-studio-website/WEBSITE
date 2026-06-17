@@ -124,22 +124,26 @@ document.addEventListener('DOMContentLoaded', function() {
     if (lightbox) {
         const lightboxImage = lightbox.querySelector('.lightbox__image');
         const lightboxClose = lightbox.querySelector('.lightbox__close');
+        let lightboxToken = 0; // prevents stale onload from overwriting a newer click
 
         photoItems.forEach(function(item) {
             item.addEventListener('click', function() {
                 const img = this.querySelector('img');
                 if (img) {
-                    // Show thumbnail immediately so lightbox isn't blank
+                    const token = ++lightboxToken;
+                    // Show thumbnail immediately so lightbox isn't blank while full-res loads
                     lightboxImage.src = img.src;
                     lightboxImage.alt = img.alt;
                     lightbox.classList.add('active');
                     document.body.style.overflow = 'hidden';
 
-                    // Swap to full-res once loaded
+                    // Swap to full-res once loaded — token check prevents race condition
                     if (img.dataset.full) {
                         const fullImg = new Image();
                         fullImg.onload = function() {
-                            lightboxImage.src = img.dataset.full;
+                            if (lightboxToken === token) {
+                                lightboxImage.src = img.dataset.full;
+                            }
                         };
                         fullImg.src = img.dataset.full;
                     }
