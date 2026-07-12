@@ -1,5 +1,12 @@
 {
   "name": "ct-studio-nz",
   "version": "1.0.0",
-  "private": true
+  "private": true,
+  "scripts": {
+    "generate-config": "node generate-config.js",
+    "rebuild-gallery": "node rebuild-gallery.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  }
 }

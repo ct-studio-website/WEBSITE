@@ -1,12 +1,18 @@
+require('dotenv').config();
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
 
-const CLOUD_NAME = 'dibcmlyg0';
-const API_KEY = '762468395374389';
-const API_SECRET = 'QAD8tHAgXDyQA_UWFyNHMEBGQus';
+const CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME;
+const API_KEY = process.env.CLOUDINARY_API_KEY;
+const API_SECRET = process.env.CLOUDINARY_API_SECRET;
 const THUMB = 'w_600,f_auto,q_auto';
 const FULL  = 'w_1920,f_auto,q_auto';
+
+if (!CLOUD_NAME || !API_KEY || !API_SECRET) {
+  console.error('Missing Cloudinary credentials — set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET in .env');
+  process.exit(1);
+}
 
 function searchFolder(folder) {
   return new Promise((resolve, reject) => {

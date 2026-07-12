@@ -7,21 +7,20 @@
  *  2. Under "Share with specific people or groups" → make it public OR add a service account
  *  3. Under "Integrate calendar" copy the Calendar ID (looks like an email or long string)
  *  4. Go to console.cloud.google.com → create a project → enable "Google Calendar API"
- *  5. Create an API Key → paste it below (restrict it to your domain for security)
+ *  5. Put the key in .env as GOOGLE_CALENDAR_API_KEY, then run `npm run generate-config`
+ *     (this writes js/config.js, which is gitignored and loaded before this file)
  */
 
 const CAL_CONFIG = {
-  // Paste your Google Calendar API Key here:
+  // Defaults — overridden by window.CAL_CONFIG from js/config.js if present
   API_KEY: 'YOUR_GOOGLE_CALENDAR_API_KEY',
-
-  // Paste your Calendar ID here (from Calendar Settings → Integrate calendar):
   CALENDAR_ID: 'ctstudionz89@gmail.com',
-
-  // WhatsApp number (no + or spaces):
   WA_NUMBER: '64224663080',
 
   // Time slots to show: 8am (8) to 6pm (18)
   HOURS: [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
+
+  ...(window.CAL_CONFIG || {}),
 };
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
