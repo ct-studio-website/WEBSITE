@@ -653,10 +653,16 @@ main {
   max-width: 90vw;
   max-height: 80vh;
   width: 900px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .video-modal__content video {
-  width: 100%;
+  max-width: 100%;
+  max-height: 80vh;
+  width: auto;
+  height: auto;
   border-radius: 8px;
 }
 
