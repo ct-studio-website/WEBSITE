@@ -253,16 +253,32 @@ document.addEventListener('DOMContentLoaded', function() {
         contactForm.addEventListener('submit', function(e) {
             e.preventDefault();
 
-            // Show toast
-            toast.classList.add('active');
+            const formData = new FormData(contactForm);
 
-            // Reset form
-            contactForm.reset();
+            fetch(contactForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            }).then(response => {
+                if (response.ok) {
+                    // Show toast
+                    toast.classList.add('active');
 
-            // Hide toast after 4 seconds
-            setTimeout(function() {
-                toast.classList.remove('active');
-            }, 4000);
+                    // Reset form
+                    contactForm.reset();
+
+                    // Hide toast after 4 seconds
+                    setTimeout(function() {
+                        toast.classList.remove('active');
+                    }, 4000);
+                } else {
+                    alert('Oops! There was a problem submitting your form.');
+                }
+            }).catch(error => {
+                alert('Oops! There was a problem submitting your form.');
+            });
         });
     }
 
