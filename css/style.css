@@ -1287,6 +1287,7 @@ main {
 .sticky-whatsapp-btn:hover {
   transform: scale(1.1);
   background-color: #1ebe57;
+}
 
 /* ===== Footer Logo Size ===== */
 .footer__logo img {
