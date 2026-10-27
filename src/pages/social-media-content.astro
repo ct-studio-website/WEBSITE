@@ -11,6 +11,8 @@ type Page = {
   buttonText?: string
   buttonLink?: string
   reels?: Reel[]
+  showFollowButton?: boolean
+  behindTheScenes?: {heading?: string; text?: string; videoUrl?: string; thumbnail?: any}
   includedHeading?: string
   included?: string[]
   packagesHeading?: string
@@ -23,7 +25,7 @@ type Page = {
 
 const page: Page =
   (await client.fetch(
-    `*[_type == "socialMediaPage"][0]{heading, intro, buttonText, buttonLink, reels[]{title, url, thumbnail}, includedHeading, included, packagesHeading, packages[]{name, description, price, priceUnit}, faqHeading, faq[]{question, answer}, testimonial, seo}`,
+    `*[_type == "socialMediaPage"][0]{heading, intro, buttonText, buttonLink, reels[]{title, url, thumbnail}, showFollowButton, behindTheScenes, includedHeading, included, packagesHeading, packages[]{name, description, price, priceUnit}, faqHeading, faq[]{question, answer}, testimonial, seo}`,
   )) ?? {}
 const settings = await getSettings()
 
@@ -31,6 +33,10 @@ const heading = page.heading ?? 'Social media reels'
 const instagram = settings.socialLinks?.find((l) => l.platform === 'Instagram')?.url
 const handle = instagram?.match(/instagram\.com\/([^/?#]+)/)?.[1]
 const platforms = ['Instagram', 'Facebook', 'TikTok']
+const bts = page.behindTheScenes?.videoUrl
+  ? {title: page.behindTheScenes.heading ?? 'Behind the scenes', url: page.behindTheScenes.videoUrl, thumbnail: page.behindTheScenes.thumbnail}
+  : undefined
+const showFollow = page.showFollowButton !== false && !!instagram
 const reels = (page.reels ?? []).filter((r) => r?.url)
 const packages = page.packages ?? []
 const faq = (page.faq ?? []).filter((f) => f?.question && f?.answer)
@@ -64,7 +70,7 @@ const jsonLd = {
       areaServed: (settings.areasServed ?? []).map((name) => ({'@type': 'Place', name})),
       url: 'https://ctstudionz.com/social-media-content',
     },
-    ...reels
+    ...[...reels, ...(bts ? [bts] : [])]
       .filter((r) => poster(r) && uploadDate(r.url))
       .map((r) => ({
         '@type': 'VideoObject',
@@ -131,12 +137,53 @@ const jsonLd = {
             ))}
           </div>
           <p class="reels-hint">Tap a reel for sound</p>
+          {showFollow && (
+            <p class="text-center">
+              <a class="follow-btn" href={instagram} target="_blank" rel="noopener noreferrer">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2c3.2 0 3.6 0 4.8.1 3.3.1 4.8 1.7 4.9 4.9.1 1.3.1 1.6.1 4.8s0 3.6-.1 4.8c-.1 3.2-1.7 4.8-4.9 4.9-1.3.1-1.6.1-4.8.1s-3.6 0-4.8-.1c-3.3-.1-4.8-1.7-4.9-4.9C2.2 15.6 2.2 15.2 2.2 12s0-3.6.1-4.8C2.4 3.9 3.9 2.4 7.2 2.3 8.4 2.2 8.8 2.2 12 2.2zm0 3.4a6.4 6.4 0 1 0 0 12.8 6.4 6.4 0 0 0 0-12.8zm0 10.6a4.2 4.2 0 1 1 0-8.4 4.2 4.2 0 0 1 0 8.4zm6.7-11.9a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z" /></svg>
+                Follow {handle ? `@${handle}` : 'us'} on Instagram
+              </a>
+            </p>
+          )}
+        </div>
+      </section>
+    )}
+
+    {bts && (
+      <section class="section section--alt">
+        <div class="container">
+          <div class="bts">
+            <div class="bts__text fade-in">
+              <h2>{bts.title}</h2>
+              <div class="divider bts__divider"></div>
+              {page.behindTheScenes?.text && <p>{page.behindTheScenes.text}</p>}
+              {page.buttonText && <a class="submit-btn social-cta" href={page.buttonLink ?? '/contact'}>{page.buttonText}</a>}
+            </div>
+            <div class="bts__video">
+              <figure class="reel fade-in">
+                <video muted loop playsinline preload="none" poster={poster(bts)} src={videoSrc(bts)} aria-label={bts.title}></video>
+                <span class="reel__badge" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>Behind the scenes
+                </span>
+                <button class="reel__sound" type="button" aria-label="Turn sound on" aria-pressed="false">
+                  <svg class="reel__icon-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6h4l5 5V4L7 9H3zm13.59 3L19 9.59 17.59 8.17 15.17 10.6 12.76 8.17 11.34 9.59 13.76 12l-2.42 2.41 1.42 1.42 2.41-2.42 2.42 2.42L19 14.41z" /></svg>
+                  <svg class="reel__icon-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 7.97v8.05A4.47 4.47 0 0 0 16.5 12zM14 3.23v2.06a7 7 0 0 1 0 13.42v2.06A9 9 0 0 0 14 3.23z" /></svg>
+                </button>
+                <figcaption class="reel__info">
+                  <span class="reel__account">
+                    <span class="reel__avatar" aria-hidden="true">CT</span>
+                    {handle ? `@${handle}` : 'CT Studio NZ'}
+                  </span>
+                </figcaption>
+              </figure>
+            </div>
+          </div>
         </div>
       </section>
     )}
 
     {(page.included?.length ?? 0) > 0 && (
-      <section class="section section--alt">
+      <section class={bts ? 'section' : 'section section--alt'}>
         <div class="container">
           <h2 class="text-center fade-in">{page.includedHeading ?? "What's included"}</h2>
           <div class="divider"></div>

@@ -2034,3 +2034,66 @@ main {
     scroll-snap-align: center;
   }
 }
+
+/* Social media page: follow button and behind the scenes */
+.follow-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 12px 24px;
+  border: 1px solid #1a1a1a;
+  border-radius: 999px;
+  color: #1a1a1a;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.follow-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+.follow-btn:hover,
+.follow-btn:focus-visible {
+  background: #1a1a1a;
+  color: #fff;
+}
+
+.bts {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 64px;
+  align-items: center;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.bts__divider {
+  margin-left: 0;
+}
+
+.bts__text p {
+  color: #6b6b6b;
+  margin-bottom: 8px;
+}
+
+@media (max-width: 768px) {
+  .bts {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    text-align: center;
+  }
+
+  .bts__divider {
+    margin-left: auto;
+  }
+
+  .bts__video {
+    max-width: 280px;
+    margin: 0 auto;
+  }
+}
