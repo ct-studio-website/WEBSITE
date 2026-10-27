@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro'
 import {client, urlFor, getSettings} from '../lib/sanity'
 import {videoSrc} from '../lib/video'
+import Promotions from '../components/Promotions.astro'
 
 type Photo = {alt?: string; crop?: unknown; hotspot?: unknown; asset?: {_id: string; metadata?: {dimensions?: {width: number; height: number}}}}
 type Home = {
@@ -80,6 +81,8 @@ const jsonLd = {
         </p>
       )}
     </section>
+
+    <Promotions place="card" page="home" />
 
     {carousel.length > 0 && (
       <section class="carousel-strip">

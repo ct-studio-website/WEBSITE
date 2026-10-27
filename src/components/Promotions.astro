@@ -1,0 +1,114 @@
+---
+// Promotions from the Studio: a banner across the top, a popup (once per visitor) or a card on the home page.
+// Rendered hidden; a small script shows each one only between its start and end dates.
+import {getPromotions, type Promotion} from '../lib/sanity'
+
+interface Props {
+  place: 'banner' | 'popup' | 'card'
+  page: string
+}
+const {place, page} = Astro.props
+const all = await getPromotions()
+const applies = (p: Promotion) => (p.showOn?.length ? p.showOn : ['all']).some((s) => s === 'all' || s === page)
+
+const banner = place === 'banner' ? all.find((p) => p.style === 'banner' && applies(p)) : undefined
+const popup = place === 'popup' ? all.find((p) => p.style === 'popup' && applies(p)) : undefined
+const cards = place === 'card' && page === 'home' ? all.filter((p) => p.style === 'card') : []
+// The script ships once, with the popup slot that every page has
+const anyOnPage =
+  place === 'popup' &&
+  all.some((p) => (p.style === 'card' ? page === 'home' : applies(p)))
+const dates = (p: Promotion) => ({'data-promo': p._id, 'data-starts': p.startsAt, 'data-ends': p.endsAt})
+const external = (href?: string) => !!href && /^https?:\/\//.test(href)
+---
+{banner && (
+  <div class="promo-banner" role="region" aria-label="Special offer" hidden {...dates(banner)}>
+    <p class="promo-banner__text">
+      {banner.message}
+      {banner.buttonText && banner.buttonLink && (
+        <a class="promo-banner__link" href={banner.buttonLink} {...(external(banner.buttonLink) ? {target: '_blank', rel: 'noopener noreferrer'} : {})}>
+          {banner.buttonText}
+        </a>
+      )}
+    </p>
+    <button class="promo-banner__close" type="button" aria-label="Close offer">&times;</button>
+  </div>
+)}
+
+{popup && (
+  <dialog class="promo-popup" aria-label="Special offer" {...dates(popup)}>
+    <form method="dialog">
+      <button class="promo-popup__close" aria-label="Close">&times;</button>
+    </form>
+    <p class="promo-popup__text">{popup.message}</p>
+    <div class="promo-popup__actions">
+      {popup.buttonText && popup.buttonLink && (
+        <a class="submit-btn promo-popup__cta" href={popup.buttonLink} {...(external(popup.buttonLink) ? {target: '_blank', rel: 'noopener noreferrer'} : {})}>
+          {popup.buttonText}
+        </a>
+      )}
+      <form method="dialog"><button class="promo-popup__dismiss">No thanks</button></form>
+    </div>
+  </dialog>
+)}
+
+{cards.length > 0 && (
+  <section class="section promo-cards">
+    <div class="container">
+      {cards.map((c) => (
+        <div class="service-card promo-card" hidden {...dates(c)}>
+          <p class="promo-card__text">{c.message}</p>
+          {c.buttonText && c.buttonLink && (
+            <a class="submit-btn" href={c.buttonLink} {...(external(c.buttonLink) ? {target: '_blank', rel: 'noopener noreferrer'} : {})}>{c.buttonText}</a>
+          )}
+        </div>
+      ))}
+    </div>
+  </section>
+)}
+
+{anyOnPage && (
+  <script is:inline>
+    (() => {
+      const now = Date.now()
+      const store = {
+        get: (k) => { try { return localStorage.getItem(k) } catch { return null } },
+        set: (k) => { try { localStorage.setItem(k, '1') } catch {} },
+      }
+      const live = (el) => {
+        const s = el.dataset.starts, e = el.dataset.ends
+        return (!s || Date.parse(s) <= now) && (!e || Date.parse(e) > now)
+      }
+      // Push the page down by the banner's height, because the header is fixed to the top
+      const space = () => {
+        const b = document.querySelector('.promo-banner:not([hidden])')
+        document.documentElement.style.setProperty('--promo-banner-h', b ? b.offsetHeight + 'px' : '0px')
+      }
+      document.querySelectorAll('[data-promo]').forEach((el) => {
+        if (!live(el)) return
+        const key = 'promo-closed-' + el.dataset.promo
+        if (el.classList.contains('promo-card')) {
+          el.hidden = false
+          return
+        }
+        if (store.get(key)) return
+        if (el.tagName === 'DIALOG') {
+          el.addEventListener('close', () => store.set(key))
+          el.addEventListener('click', (e) => { if (e.target === el) el.close() })
+          el.querySelector('.promo-popup__cta')?.addEventListener('click', () => store.set(key))
+          // Wait a few seconds so visitors see the page first
+          setTimeout(() => { if (!el.open && el.showModal) el.showModal() }, 4000)
+          return
+        }
+        el.hidden = false
+        el.querySelector('.promo-banner__close')?.addEventListener('click', () => {
+          el.hidden = true
+          store.set(key)
+          space()
+        })
+      })
+      space()
+      addEventListener('resize', space)
+    })()
+  </script>
+)}

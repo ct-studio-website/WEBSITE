@@ -2098,3 +2098,136 @@ main {
     margin: 0 auto;
   }
 }
+
+/* ===== Promotions ===== */
+main {
+  margin-top: var(--promo-banner-h, 0px);
+}
+
+.promo-banner {
+  position: relative;
+  background: #1a1a1a;
+  color: #ffffff;
+  text-align: center;
+  padding: 10px 48px;
+  font-size: 0.9rem;
+}
+
+.promo-banner[hidden] {
+  display: none;
+}
+
+.promo-banner__text {
+  margin: 0;
+}
+
+.promo-banner__link {
+  margin-left: 12px;
+  color: #c8a96e;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+}
+
+.promo-banner__close {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  border: 0;
+  background: transparent;
+  color: #ffffff;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.promo-popup {
+  margin: auto; /* the CSS reset removes the browser's default centring */
+  color: #1a1a1a;
+  max-width: 440px;
+  width: calc(100% - 32px);
+  border: 0;
+  border-radius: 12px;
+  padding: 40px 32px 32px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+}
+
+.promo-popup::backdrop {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.promo-popup__close {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  border: 0;
+  background: transparent;
+  font-size: 1.75rem;
+  line-height: 1;
+  cursor: pointer;
+  color: #6b6b6b;
+}
+
+.promo-popup__text {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.6rem;
+  font-weight: 600;
+  line-height: 1.3;
+  margin-bottom: 24px;
+}
+
+.promo-popup__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.promo-popup__cta {
+  text-decoration: none;
+  align-self: center;
+  margin: 0 auto;
+}
+
+.promo-popup__close:focus-visible,
+.promo-banner__close:focus-visible {
+  outline: 2px solid #c8a96e;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.promo-popup__dismiss {
+  border: 0;
+  background: transparent;
+  color: #6b6b6b;
+  font-size: 0.85rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.promo-cards {
+  padding: 40px 0;
+}
+
+.promo-card {
+  max-width: 720px;
+  margin: 0 auto 16px;
+  text-align: center;
+  border: 1px solid #c8a96e;
+}
+
+.promo-card[hidden] {
+  display: none;
+}
+
+.promo-card__text {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+}

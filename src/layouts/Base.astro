@@ -1,6 +1,7 @@
 ---
 import {getSettings, urlFor} from '../lib/sanity'
 import SocialIcons from '../components/SocialIcons.astro'
+import Promotions from '../components/Promotions.astro'
 
 // Shared page shell: head, header, menu, footer, booking panel, WhatsApp button.
 interface Props {
@@ -35,6 +36,7 @@ const logoUrl = settings.logo
   ? urlFor(settings.logo).width(600).url()
   : 'https://res.cloudinary.com/dibcmlyg0/image/upload/q_auto/f_auto/v1779698741/logo_yxofkd.png'
 const whatsapp = settings.whatsappNumber ?? '64224663080'
+const pageKey = active ?? (path.replace(/^\//, '') || 'home')
 ---
 <!doctype html>
 <html lang="en">
@@ -74,6 +76,7 @@ const whatsapp = settings.whatsappNumber ?? '64224663080'
   </head>
   <body>
     <header class="header">
+      <Promotions place="banner" page={pageKey} />
       <div class="header__row-1">
         <div class="container">
           <div class="header__social">
@@ -198,6 +201,8 @@ const whatsapp = settings.whatsappNumber ?? '64224663080'
         />
       </svg>
     </a>
+
+    <Promotions place="popup" page={pageKey} />
 
     <script is:inline src="/js/main.js"></script>
     <script is:inline src="/js/calendar.js"></script>

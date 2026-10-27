@@ -49,3 +49,29 @@ export const telHref = (phone?: string) => {
 // ["Christchurch", "Canterbury"] -> "Christchurch and Canterbury"
 export const joinAreas = (areas: string[] = []) =>
   areas.length <= 1 ? areas.join('') : areas.slice(0, -1).join(', ') + ' and ' + areas.at(-1)
+
+export type Promotion = {
+  _id: string
+  message: string
+  buttonText?: string
+  buttonLink?: string
+  style: 'banner' | 'popup' | 'card'
+  showOn?: string[]
+  startsAt?: string
+  endsAt?: string
+}
+
+// Switched-on promotions that haven't ended yet. Start and end dates are checked again in
+// the visitor's browser, so an offer appears and disappears on time without a rebuild.
+let promotionsPromise: Promise<Promotion[]> | undefined
+export function getPromotions() {
+  if (import.meta.env.DEV) promotionsPromise = undefined
+  promotionsPromise ??= client
+    .fetch<Promotion[]>(
+      `*[_type == "promotion" && enabled == true && defined(message) && (!defined(endsAt) || endsAt > now())]
+        | order(_updatedAt desc){_id, message, buttonText, buttonLink, style, showOn, startsAt, endsAt}`,
+    )
+    .then((p) => p ?? [])
+  return promotionsPromise
+}
+
