@@ -2018,9 +2018,11 @@ main {
 @media (max-width: 768px) {
   .reels-grid {
     display: flex;
+    justify-content: flex-start; /* centred overflow can't be scrolled to on the left */
     gap: 14px;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
+    scroll-padding-inline: 24px;
     padding: 4px 24px 24px;
     margin: 0 -24px;
     scrollbar-width: none;
@@ -2032,7 +2034,7 @@ main {
 
   .reel {
     flex: 0 0 72%;
-    scroll-snap-align: center;
+    scroll-snap-align: start;
   }
 }
 
