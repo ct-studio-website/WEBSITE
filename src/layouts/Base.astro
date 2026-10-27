@@ -1,73 +1,56 @@
+---
+// Shared page shell: head, header, menu, footer, booking panel, WhatsApp button.
+interface Props {
+  title: string
+  description: string
+  path: string
+  active?: 'home' | 'photo' | 'video' | 'about' | 'contact'
+  ogTitle?: string
+  ogDescription?: string
+  twitterDescription?: string
+  ogImage?: string
+  ogImageAlt?: string
+  jsonLd?: Record<string, unknown>
+}
+const {
+  title,
+  description,
+  path,
+  active,
+  ogTitle = title,
+  ogDescription = description,
+  twitterDescription = ogDescription,
+  ogImage = 'https://ctstudionz.com/IMG_4154.jpg',
+  ogImageAlt = 'CT Studio NZ photography studio',
+  jsonLd,
+} = Astro.props
+const canonical = new URL(path, 'https://ctstudionz.com').href
+---
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      name="description"
-      content="CT Studio NZ - Professional Photography and Videography in Christchurch, New Zealand. Capturing moments, stories, and brands with elegance and creativity."
-    />
-    <title>CT Studio NZ | Photography & Videography</title>
+    <meta name="description" content={description} />
+    <title>{title}</title>
     <meta name="author" content="CT Studio NZ" />
     <meta name="robots" content="index, follow" />
     <meta name="theme-color" content="#111111" />
-    <link rel="canonical" href="https://ctstudionz.com/" />
-    <link rel="icon" type="image/png" href="assets/logo/logo.PNG" />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/png" href="/assets/logo/logo.PNG" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="CT Studio NZ" />
     <meta property="og:locale" content="en_NZ" />
-    <meta
-      property="og:title"
-      content="CT Studio NZ | Photography & Videography"
-    />
-    <meta
-      property="og:description"
-      content="Professional photography and videography in Christchurch, New Zealand. Capturing moments, stories, and brands with elegance and creativity."
-    />
-    <meta property="og:url" content="https://ctstudionz.com/" />
-    <meta property="og:image" content="https://ctstudionz.com/IMG_4154.jpg" />
-    <meta property="og:image:alt" content="CT Studio NZ photography studio" />
+    <meta property="og:title" content={ogTitle} />
+    <meta property="og:description" content={ogDescription} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:alt" content={ogImageAlt} />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta
-      name="twitter:title"
-      content="CT Studio NZ | Photography & Videography"
-    />
-    <meta
-      name="twitter:description"
-      content="Professional photography and videography in Christchurch, New Zealand."
-    />
-    <meta name="twitter:image" content="https://ctstudionz.com/IMG_4154.jpg" />
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "ProfessionalService",
-        "@id": "https://ctstudionz.com/#business",
-        "name": "CT Studio NZ",
-        "url": "https://ctstudionz.com/",
-        "logo": "https://ctstudionz.com/assets/logo/logo.PNG",
-        "image": "https://ctstudionz.com/IMG_4154.jpg",
-        "description": "Photography and videography studio in Rolleston, with photoshoots across Christchurch and Canterbury, New Zealand.",
-        "email": "ctstudionz89@gmail.com",
-        "telephone": "+64 22 466 3080",
-        "areaServed": [
-          { "@type": "City", "name": "Christchurch" },
-          { "@type": "AdministrativeArea", "name": "Canterbury" }
-        ],
-        "address": {
-          "@type": "PostalAddress",
-          "addressLocality": "Rolleston",
-          "addressRegion": "Canterbury",
-          "addressCountry": "NZ"
-        },
-        "hasMap": "https://maps.google.com/?cid=8282387709924293099",
-        "serviceType": ["Photography", "Videography"],
-        "sameAs": [
-          "https://www.instagram.com/ct_studio_nz/",
-          "https://www.youtube.com/@ctstudionz",
-          "https://www.facebook.com/ctstudionz"
-        ]
-      }
-    </script>
+    <meta name="twitter:title" content={ogTitle} />
+    <meta name="twitter:description" content={twitterDescription} />
+    <meta name="twitter:image" content={ogImage} />
+    {jsonLd && <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -77,12 +60,10 @@
       onload="this.onload=null;this.rel='stylesheet'"
     />
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=DM+Sans:wght@400;500&display=swap" /></noscript>
-    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="/css/style.css" />
   </head>
   <body>
-    <!-- Header -->
     <header class="header">
-      <!-- Row 1: Social Icons -->
       <div class="header__row-1">
         <div class="container">
           <div class="header__social">
@@ -134,8 +115,6 @@
           </button>
         </div>
       </div>
-
-      <!-- Row 2: Logo & Nav -->
       <div class="header__row-2">
         <div class="container">
           <a href="/" class="header__logo">
@@ -145,161 +124,32 @@
             />
           </a>
           <nav class="header__nav" aria-label="Main navigation">
-            <a href="/" class="active">Home</a>
-            <a href="/photo">Photo</a>
-            <a href="/video">Video</a>
-            <a href="/about">About</a>
-            <a href="/contact">Contact</a>
+            <a href="/" class={active === "home" ? "active" : undefined}>Home</a>
+            <a href="/photo" class={active === "photo" ? "active" : undefined}>Photo</a>
+            <a href="/video" class={active === "video" ? "active" : undefined}>Video</a>
+            <a href="/about" class={active === "about" ? "active" : undefined}>About</a>
+            <a href="/contact" class={active === "contact" ? "active" : undefined}>Contact</a>
           </nav>
         </div>
       </div>
     </header>
-
-    <!-- Mobile Menu -->
     <div
       class="mobile-menu"
       role="dialog"
       aria-modal="true"
       aria-label="Mobile navigation"
     >
-      <a href="/" class="active">Home</a>
-      <a href="/photo">Photo</a>
-      <a href="/video">Video</a>
-      <a href="/about">About</a>
-      <a href="/contact">Contact</a>
+      <a href="/" class={active === "home" ? "active" : undefined}>Home</a>
+      <a href="/photo" class={active === "photo" ? "active" : undefined}>Photo</a>
+      <a href="/video" class={active === "video" ? "active" : undefined}>Video</a>
+      <a href="/about" class={active === "about" ? "active" : undefined}>About</a>
+      <a href="/contact" class={active === "contact" ? "active" : undefined}>Contact</a>
     </div>
 
-    <main>
-      <!-- Hero Section -->
-      <section class="hero">
-        <div class="hero__video fade-in">
-          <video autoplay muted loop playsinline poster="https://res.cloudinary.com/dibcmlyg0/video/upload/w_1280,c_limit,so_0/q_auto/f_auto/v1781407692/new_version_fq0qus.jpg">
-            <source
-              src="https://res.cloudinary.com/dibcmlyg0/video/upload/w_1280,c_limit/q_auto/f_auto/v1781407692/new_version_fq0qus.mp4"
-              type="video/mp4"
-            />
-            Your browser does not support the video tag.
-          </video>
-        </div>
+    <slot />
 
-        <h1 class="hero__tagline fade-in">
-          Photographer &amp; Videographer · Christchurch &amp; Canterbury
-        </h1>
-      </section>
+    <slot name="overlays" />
 
-      <!-- Carousel Strip -->
-      <section class="carousel-strip">
-        <div class="carousel-strip__track">
-          <img
-            class="carousel-strip__image"
-            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696448/carousel-8_sd9poh.jpg"
-            alt="Couple portrait in warm golden light"
-            loading="lazy"
-          />
-          <img
-            class="carousel-strip__image"
-            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1788562843/CT_05868_sjf91q.jpg"
-            alt="Studio portrait of a woman seated on a tall stool"
-            loading="lazy"
-          />
-          <img
-            class="carousel-strip__image"
-            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696413/carousel-6_sri3y9.jpg"
-            alt="Portrait of a young woman reading a book"
-            loading="lazy"
-          />
-          <img
-            class="carousel-strip__image"
-            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696371/carousel-5_a1oeoi.jpg"
-            alt="Portrait of a woman in soft natural light"
-            loading="lazy"
-          />
-          <img
-            class="carousel-strip__image"
-            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696338/carousel-4_k2qys2.jpg"
-            alt="Couple portrait outdoors among greenery"
-            loading="lazy"
-          />
-          <img
-            class="carousel-strip__image"
-            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696328/carousel-3_ylmgyg.jpg"
-            alt="Portrait of a woman in a white dress"
-            loading="lazy"
-          />
-          <img
-            class="carousel-strip__image"
-            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696278/carousel-2_lb3fte.jpg"
-            alt="Family portrait of a woman holding a smiling toddler outdoors under golden leaves"
-            loading="lazy"
-          />
-          <img
-            class="carousel-strip__image"
-            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696153/carousel-1_qvozye.webp"
-            alt="Portrait of a woman against a deep red background"
-            loading="lazy"
-          />
-          <!-- Duplicate for seamless loop -->
-          <img
-            class="carousel-strip__image"
-            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696448/carousel-8_sd9poh.jpg"
-            alt=""
-            aria-hidden="true"
-            loading="lazy"
-          />
-          <img
-            class="carousel-strip__image"
-            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1788562843/CT_05868_sjf91q.jpg"
-            alt=""
-            aria-hidden="true"
-            loading="lazy"
-          />
-          <img
-            class="carousel-strip__image"
-            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696413/carousel-6_sri3y9.jpg"
-            alt=""
-            aria-hidden="true"
-            loading="lazy"
-          />
-          <img
-            class="carousel-strip__image"
-            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696371/carousel-5_a1oeoi.jpg"
-            alt=""
-            aria-hidden="true"
-            loading="lazy"
-          />
-          <img
-            class="carousel-strip__image"
-            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696338/carousel-4_k2qys2.jpg"
-            alt=""
-            aria-hidden="true"
-            loading="lazy"
-          />
-          <img
-            class="carousel-strip__image"
-            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696328/carousel-3_ylmgyg.jpg"
-            alt=""
-            aria-hidden="true"
-            loading="lazy"
-          />
-          <img
-            class="carousel-strip__image"
-            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696278/carousel-2_lb3fte.jpg"
-            alt=""
-            aria-hidden="true"
-            loading="lazy"
-          />
-          <img
-            class="carousel-strip__image"
-            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696153/carousel-1_qvozye.webp"
-            alt=""
-            aria-hidden="true"
-            loading="lazy"
-          />
-        </div>
-      </section>
-    </main>
-
-    <!-- the Footer -->
     <footer class="footer">
       <div class="container">
         <div class="footer__logo">
@@ -407,7 +257,7 @@
       </svg>
     </a>
 
-    <script src="js/main.js"></script>
-    <script src="js/calendar.js"></script>
+    <script is:inline src="/js/main.js"></script>
+    <script is:inline src="/js/calendar.js"></script>
   </body>
 </html>

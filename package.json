@@ -1,12 +1,14 @@
 {
   "name": "ct-studio-nz",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "generate-config": "node generate-config.js",
-    "rebuild-gallery": "node rebuild-gallery.js"
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
   },
   "dependencies": {
-    "dotenv": "^16.4.5"
+    "astro": "^7.4.2"
   }
 }

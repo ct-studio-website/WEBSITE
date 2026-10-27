@@ -1,0 +1,182 @@
+---
+import Base from '../layouts/Base.astro'
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "ProfessionalService",
+  "@id": "https://ctstudionz.com/#business",
+  "name": "CT Studio NZ",
+  "url": "https://ctstudionz.com/",
+  "logo": "https://ctstudionz.com/assets/logo/logo.PNG",
+  "image": "https://ctstudionz.com/IMG_4154.jpg",
+  "description": "Photography and videography studio in Rolleston, with photoshoots across Christchurch and Canterbury, New Zealand.",
+  "email": "ctstudionz89@gmail.com",
+  "telephone": "+64 22 466 3080",
+  "areaServed": [
+    {
+      "@type": "City",
+      "name": "Christchurch"
+    },
+    {
+      "@type": "AdministrativeArea",
+      "name": "Canterbury"
+    }
+  ],
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Rolleston",
+    "addressRegion": "Canterbury",
+    "addressCountry": "NZ"
+  },
+  "hasMap": "https://maps.google.com/?cid=8282387709924293099",
+  "serviceType": [
+    "Photography",
+    "Videography"
+  ],
+  "sameAs": [
+    "https://www.instagram.com/ct_studio_nz/",
+    "https://www.youtube.com/@ctstudionz",
+    "https://www.facebook.com/ctstudionz"
+  ]
+}
+---
+
+<Base
+  title="CT Studio NZ | Photography & Videography"
+  description="CT Studio NZ - Professional Photography and Videography in Christchurch, New Zealand. Capturing moments, stories, and brands with elegance and creativity."
+  path="/"
+  active="home"
+  ogDescription="Professional photography and videography in Christchurch, New Zealand. Capturing moments, stories, and brands with elegance and creativity."
+  twitterDescription="Professional photography and videography in Christchurch, New Zealand."
+  jsonLd={jsonLd}
+>
+  <main>
+      <!-- Hero Section -->
+      <section class="hero">
+        <div class="hero__video fade-in">
+          <video autoplay muted loop playsinline poster="https://res.cloudinary.com/dibcmlyg0/video/upload/w_1280,c_limit,so_0/q_auto/f_auto/v1781407692/new_version_fq0qus.jpg">
+            <source
+              src="https://res.cloudinary.com/dibcmlyg0/video/upload/w_1280,c_limit/q_auto/f_auto/v1781407692/new_version_fq0qus.mp4"
+              type="video/mp4"
+            />
+            Your browser does not support the video tag.
+          </video>
+        </div>
+
+        <h1 class="hero__tagline fade-in">
+          Photographer &amp; Videographer · Christchurch &amp; Canterbury
+        </h1>
+      </section>
+
+      <!-- Carousel Strip -->
+      <section class="carousel-strip">
+        <div class="carousel-strip__track">
+          <img
+            class="carousel-strip__image"
+            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696448/carousel-8_sd9poh.jpg"
+            alt="Couple portrait in warm golden light"
+            loading="lazy"
+          />
+          <img
+            class="carousel-strip__image"
+            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1788562843/CT_05868_sjf91q.jpg"
+            alt="Studio portrait of a woman seated on a tall stool"
+            loading="lazy"
+          />
+          <img
+            class="carousel-strip__image"
+            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696413/carousel-6_sri3y9.jpg"
+            alt="Portrait of a young woman reading a book"
+            loading="lazy"
+          />
+          <img
+            class="carousel-strip__image"
+            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696371/carousel-5_a1oeoi.jpg"
+            alt="Portrait of a woman in soft natural light"
+            loading="lazy"
+          />
+          <img
+            class="carousel-strip__image"
+            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696338/carousel-4_k2qys2.jpg"
+            alt="Couple portrait outdoors among greenery"
+            loading="lazy"
+          />
+          <img
+            class="carousel-strip__image"
+            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696328/carousel-3_ylmgyg.jpg"
+            alt="Portrait of a woman in a white dress"
+            loading="lazy"
+          />
+          <img
+            class="carousel-strip__image"
+            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696278/carousel-2_lb3fte.jpg"
+            alt="Family portrait of a woman holding a smiling toddler outdoors under golden leaves"
+            loading="lazy"
+          />
+          <img
+            class="carousel-strip__image"
+            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696153/carousel-1_qvozye.webp"
+            alt="Portrait of a woman against a deep red background"
+            loading="lazy"
+          />
+          <!-- Duplicate for seamless loop -->
+          <img
+            class="carousel-strip__image"
+            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696448/carousel-8_sd9poh.jpg"
+            alt=""
+            aria-hidden="true"
+            loading="lazy"
+          />
+          <img
+            class="carousel-strip__image"
+            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1788562843/CT_05868_sjf91q.jpg"
+            alt=""
+            aria-hidden="true"
+            loading="lazy"
+          />
+          <img
+            class="carousel-strip__image"
+            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696413/carousel-6_sri3y9.jpg"
+            alt=""
+            aria-hidden="true"
+            loading="lazy"
+          />
+          <img
+            class="carousel-strip__image"
+            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696371/carousel-5_a1oeoi.jpg"
+            alt=""
+            aria-hidden="true"
+            loading="lazy"
+          />
+          <img
+            class="carousel-strip__image"
+            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696338/carousel-4_k2qys2.jpg"
+            alt=""
+            aria-hidden="true"
+            loading="lazy"
+          />
+          <img
+            class="carousel-strip__image"
+            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696328/carousel-3_ylmgyg.jpg"
+            alt=""
+            aria-hidden="true"
+            loading="lazy"
+          />
+          <img
+            class="carousel-strip__image"
+            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696278/carousel-2_lb3fte.jpg"
+            alt=""
+            aria-hidden="true"
+            loading="lazy"
+          />
+          <img
+            class="carousel-strip__image"
+            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696153/carousel-1_qvozye.webp"
+            alt=""
+            aria-hidden="true"
+            loading="lazy"
+          />
+        </div>
+      </section>
+    </main>
+</Base>
