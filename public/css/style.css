@@ -2233,3 +2233,12 @@ main {
   font-weight: 600;
   margin-bottom: 20px;
 }
+
+/* Hidden field that only spam bots fill in */
+.form-honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}

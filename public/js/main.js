@@ -253,13 +253,14 @@ document.addEventListener('DOMContentLoaded', function() {
         contactForm.addEventListener('submit', function(e) {
             e.preventDefault();
 
-            const formData = new FormData(contactForm);
+            // Netlify Forms: post the fields to the site itself, URL-encoded
+            const body = new URLSearchParams(new FormData(contactForm)).toString();
 
-            fetch(contactForm.action, {
+            fetch('/', {
                 method: 'POST',
-                body: formData,
+                body: body,
                 headers: {
-                    'Accept': 'application/json'
+                    'Content-Type': 'application/x-www-form-urlencoded'
                 }
             }).then(response => {
                 if (response.ok) {

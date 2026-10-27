@@ -8,7 +8,7 @@ Website for CT Studio NZ, photography and videography across Christchurch and Ca
 - Static files (CSS, JS, logo, robots.txt, sitemap) are in `public/` and are copied to the site as they are
 - Content is being moved to Sanity (Studio: `studio-ct-studio-website-nz`, project `gds6oj8v`)
 - Hosted on Netlify, which runs `npm run build` and publishes `dist/` (settings in `netlify.toml`)
-- Photos and videos are hosted on Cloudinary; the contact form is handled by Formspree; domain and DNS are at GoDaddy
+- Photos and videos are hosted on Cloudinary; the contact form uses Netlify Forms (submissions in Netlify → Forms, emailed to CT); domain and DNS are at GoDaddy
 
 ## Working on it
 

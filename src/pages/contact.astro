@@ -31,10 +31,17 @@ const optionValue = (o: string) => o.toLowerCase().replace(/[^a-z0-9]+/g, '-').r
           <div class="contact-grid">
             <form
               class="contact-form fade-in"
-              action="https://formspree.io/f/xlgqrplq"
+              action="/contact"
+              name="contact"
+              data-netlify="true"
+              netlify-honeypot="company"
               method="POST"
               id="contactForm"
             >
+              <input type="hidden" name="form-name" value="contact" />
+              <p class="form-honeypot" aria-hidden="true">
+                <label>Leave this empty <input name="company" tabindex="-1" autocomplete="off" /></label>
+              </p>
               <div class="form-group">
                 <label for="name">Name *</label>
                 <input type="text" id="name" name="name" required />
