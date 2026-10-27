@@ -1742,3 +1742,36 @@ main {
 .legal-page ul {
   padding-left: 20px;
 }
+
+/* ===== SheDecodes footer credit ===== */
+.footer__credit-wrap {
+  margin-top: 20px;
+}
+
+.footer__credit {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: #6b6b6b;
+  text-decoration: none;
+}
+
+.footer__credit svg {
+  display: block;
+  flex-shrink: 0;
+}
+
+.footer__credit strong {
+  color: #1e1030;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.footer__credit:hover strong,
+.footer__credit:focus-visible strong {
+  color: #ff2e93;
+}
+
+/* Logo pixel animation (from the SheDecodes Logo component) */
+.sdA-g,.sdA-g2{opacity:0}.sdA-b,.sdA-b2,.sdA-g,.sdA-g2{animation-duration:5.6s;animation-timing-function:step-end;animation-iteration-count:infinite}.sdA-loop .sdA-b,.sdA-hover:hover .sdA-b,.sdA-hover:focus-visible .sdA-b{animation-name:sdA-b}.sdA-loop .sdA-b2,.sdA-hover:hover .sdA-b2,.sdA-hover:focus-visible .sdA-b2{animation-name:sdA-b2}.sdA-loop .sdA-g,.sdA-hover:hover .sdA-g,.sdA-hover:focus-visible .sdA-g{animation-name:sdA-g}.sdA-loop .sdA-g2,.sdA-hover:hover .sdA-g2,.sdA-hover:focus-visible .sdA-g2{animation-name:sdA-g2}@keyframes sdA-b{0%{opacity:.12}3.5%,100%{opacity:1}}@keyframes sdA-b2{0%{opacity:.12}3.5%{opacity:1}46%{opacity:.12}49.5%,100%{opacity:1}}@keyframes sdA-g{0%{opacity:1}3.5%{opacity:.45}7%,100%{opacity:0}}@keyframes sdA-g2{0%{opacity:1}3.5%{opacity:.45}7%{opacity:0}46%{opacity:1}49.5%,100%{opacity:0}}@media (prefers-reduced-motion:reduce){.sdA-b,.sdA-b2,.sdA-g,.sdA-g2{animation:none!important}}
