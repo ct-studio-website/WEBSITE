@@ -1,5 +1,11 @@
 ---
 import Base from '../layouts/Base.astro'
+import {client} from '../lib/sanity'
+
+const home = await client.fetch<{secondLine?: {text?: string; link?: string}} | null>(
+  `*[_type == "homePage"][0]{secondLine}`,
+)
+const secondLine = home?.secondLine
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -66,6 +72,11 @@ const jsonLd = {
         <h1 class="hero__tagline fade-in">
           Photographer &amp; Videographer · Christchurch &amp; Canterbury
         </h1>
+        {secondLine?.text && (
+          <p class="hero__subline fade-in">
+            {secondLine.link ? <a href={secondLine.link}>{secondLine.text}</a> : secondLine.text}
+          </p>
+        )}
       </section>
 
       <!-- Carousel Strip -->

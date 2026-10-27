@@ -1,0 +1,262 @@
+---
+import Base from '../layouts/Base.astro'
+import {client, urlFor, getSettings} from '../lib/sanity'
+
+type Reel = {title: string; url: string; thumbnail?: any}
+type Pkg = {name: string; description?: string; price?: number; priceUnit?: string}
+type Faq = {question: string; answer: string}
+type Page = {
+  heading?: string
+  intro?: string
+  buttonText?: string
+  buttonLink?: string
+  reels?: Reel[]
+  includedHeading?: string
+  included?: string[]
+  packagesHeading?: string
+  packages?: Pkg[]
+  faqHeading?: string
+  faq?: Faq[]
+  testimonial?: {quote?: string; name?: string; role?: string}
+  seo?: {title?: string; description?: string}
+}
+
+const page: Page =
+  (await client.fetch(
+    `*[_type == "socialMediaPage"][0]{heading, intro, buttonText, buttonLink, reels[]{title, url, thumbnail}, includedHeading, included, packagesHeading, packages[]{name, description, price, priceUnit}, faqHeading, faq[]{question, answer}, testimonial, seo}`,
+  )) ?? {}
+const settings = await getSettings()
+
+const heading = page.heading ?? 'Social media reels'
+const instagram = settings.socialLinks?.find((l) => l.platform === 'Instagram')?.url
+const handle = instagram?.match(/instagram\.com\/([^/?#]+)/)?.[1]
+const platforms = ['Instagram', 'Facebook', 'TikTok']
+const reels = (page.reels ?? []).filter((r) => r?.url)
+const packages = page.packages ?? []
+const faq = (page.faq ?? []).filter((f) => f?.question && f?.answer)
+const isCloudinary = (url: string) => url.includes('res.cloudinary.com') && url.includes('/video/upload/')
+
+// Phone-sized versions from Cloudinary, so a visitor never downloads the full file
+const videoSrc = (r: Reel) =>
+  isCloudinary(r.url) ? r.url.replace('/video/upload/', '/video/upload/w_720,c_limit/q_auto/f_auto/') : r.url
+const poster = (r: Reel) =>
+  r.thumbnail
+    ? urlFor(r.thumbnail).width(540).height(960).fit('crop').url()
+    : isCloudinary(r.url)
+      ? r.url.replace('/video/upload/', '/video/upload/w_540,h_960,c_fill,so_0/').replace(/\.[a-z0-9]+$/i, '.jpg')
+      : undefined
+// Cloudinary links carry the upload time (v + Unix seconds), which Google wants as uploadDate
+const uploadDate = (url: string) => {
+  const m = url.match(/\/v(\d{10})\//)
+  return m ? new Date(Number(m[1]) * 1000).toISOString() : undefined
+}
+const price = (p: Pkg) => (p.price ? `From $${p.price.toLocaleString('en-NZ')}${p.priceUnit ? ` ${p.priceUnit}` : ''}` : 'Price on request')
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Service',
+      name: 'Social media reels and content creation',
+      serviceType: 'Social media video production',
+      description: page.intro,
+      provider: {'@id': 'https://ctstudionz.com/#business'},
+      areaServed: (settings.areasServed ?? []).map((name) => ({'@type': 'Place', name})),
+      url: 'https://ctstudionz.com/social-media-content',
+    },
+    ...reels
+      .filter((r) => poster(r) && uploadDate(r.url))
+      .map((r) => ({
+        '@type': 'VideoObject',
+        name: r.title,
+        description: `${r.title}: a social media reel by CT Studio NZ`,
+        thumbnailUrl: poster(r),
+        contentUrl: videoSrc(r),
+        uploadDate: uploadDate(r.url),
+      })),
+    ...(faq.length
+      ? [
+          {
+            '@type': 'FAQPage',
+            mainEntity: faq.map((f) => ({'@type': 'Question', name: f.question, acceptedAnswer: {'@type': 'Answer', text: f.answer}})),
+          },
+        ]
+      : []),
+  ],
+}
+---
+
+<Base
+  title={page.seo?.title ?? 'Social Media Reels & Content, Christchurch | CT Studio NZ'}
+  description={page.seo?.description ?? page.intro ?? heading}
+  path="/social-media-content"
+  active="social"
+  jsonLd={jsonLd}
+>
+  <main>
+    <section class="page-header">
+      <div class="container">
+        <h1 class="fade-in social-heading">{heading}</h1>
+        <div class="divider"></div>
+        <ul class="platforms fade-in" aria-label="Made for">
+          {platforms.map((p) => <li>{p}</li>)}
+        </ul>
+        {page.intro && <p class="page-header__subtitle fade-in">{page.intro}</p>}
+        {page.buttonText && <a class="submit-btn social-cta fade-in" href={page.buttonLink ?? '/contact'}>{page.buttonText}</a>}
+      </div>
+    </section>
+
+    {reels.length > 0 && (
+      <section class="section reels-section">
+        <div class="container">
+          <div class="reels-grid">
+            {reels.map((r) => (
+              <figure class="reel fade-in">
+                <video muted loop playsinline preload="none" poster={poster(r)} src={videoSrc(r)} aria-label={r.title}></video>
+                <span class="reel__badge" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>Reel
+                </span>
+                <button class="reel__sound" type="button" aria-label="Turn sound on" aria-pressed="false">
+                  <svg class="reel__icon-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6h4l5 5V4L7 9H3zm13.59 3L19 9.59 17.59 8.17 15.17 10.6 12.76 8.17 11.34 9.59 13.76 12l-2.42 2.41 1.42 1.42 2.41-2.42 2.42 2.42L19 14.41z" /></svg>
+                  <svg class="reel__icon-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 7.97v8.05A4.47 4.47 0 0 0 16.5 12zM14 3.23v2.06a7 7 0 0 1 0 13.42v2.06A9 9 0 0 0 14 3.23z" /></svg>
+                </button>
+                <figcaption class="reel__info">
+                  <span class="reel__account">
+                    <span class="reel__avatar" aria-hidden="true">CT</span>
+                    {handle ? `@${handle}` : 'CT Studio NZ'}
+                  </span>
+                  <span class="reel__title">{r.title}</span>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+          <p class="reels-hint">Tap a reel for sound</p>
+        </div>
+      </section>
+    )}
+
+    {(page.included?.length ?? 0) > 0 && (
+      <section class="section section--alt">
+        <div class="container">
+          <h2 class="text-center fade-in">{page.includedHeading ?? "What's included"}</h2>
+          <div class="divider"></div>
+          <div class="service-card included-card fade-in">
+            <ul class="service-card__list">{page.included!.map((item) => <li>{item}</li>)}</ul>
+          </div>
+        </div>
+      </section>
+    )}
+
+    {packages.length > 0 && (
+      <section class="section">
+        <div class="container">
+          <h2 class="text-center fade-in">{page.packagesHeading ?? 'Packages'}</h2>
+          <div class="divider"></div>
+          <div class="packages-grid">
+            {packages.map((p) => (
+              <div class="service-card package fade-in">
+                <h3>{p.name}</h3>
+                {p.description && <p class="service-card__lead">{p.description}</p>}
+                <p class="package__price">{price(p)}</p>
+                <a class="submit-btn package__cta" href={page.buttonLink ?? '/contact'}>Enquire</a>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    )}
+
+    {page.testimonial?.quote && (
+      <section class="section section--alt">
+        <div class="container">
+          <blockquote class="testimonial fade-in">
+            <p>“{page.testimonial.quote}”</p>
+            {page.testimonial.name && (
+              <footer>
+                {page.testimonial.name}
+                {page.testimonial.role && <span>, {page.testimonial.role}</span>}
+              </footer>
+            )}
+          </blockquote>
+        </div>
+      </section>
+    )}
+
+    {faq.length > 0 && (
+      <section class="section">
+        <div class="container">
+          <h2 class="text-center fade-in">{page.faqHeading ?? 'Questions'}</h2>
+          <div class="divider"></div>
+          <div class="faq-list fade-in">
+            {faq.map((f) => (
+              <div class="faq-item">
+                <div class="faq-question" role="button" tabindex="0" aria-expanded="false">
+                  <h4>{f.question}</h4>
+                  <div class="faq-toggle" aria-hidden="true"></div>
+                </div>
+                <div class="faq-answer"><p>{f.answer}</p></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    )}
+
+    {page.buttonText && (
+      <section class="section section--alt">
+        <div class="container text-center">
+          <a class="submit-btn social-cta" href={page.buttonLink ?? '/contact'}>{page.buttonText}</a>
+        </div>
+      </section>
+    )}
+  </main>
+</Base>
+
+<script>
+  const reels = [...document.querySelectorAll<HTMLElement>('.reel')]
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+  const setSound = (reel: HTMLElement, on: boolean) => {
+    const video = reel.querySelector('video')!
+    const button = reel.querySelector<HTMLButtonElement>('.reel__sound')!
+    video.muted = !on
+    reel.classList.toggle('is-unmuted', on)
+    button.setAttribute('aria-pressed', String(on))
+    button.setAttribute('aria-label', on ? 'Turn sound off' : 'Turn sound on')
+  }
+
+  // Play silently while at least 60% of a reel is on screen, like the apps do
+  if (!reduceMotion && 'IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((entry) => {
+          const video = entry.target.querySelector('video')!
+          if (entry.isIntersecting) video.play().catch(() => {})
+          else {
+            video.pause()
+            setSound(entry.target as HTMLElement, false)
+          }
+        }),
+      {threshold: 0.6},
+    )
+    reels.forEach((reel) => observer.observe(reel))
+  }
+
+  reels.forEach((reel) => {
+    const video = reel.querySelector('video')!
+    const toggle = () => {
+      const turnOn = video.muted || video.paused
+      reels.forEach((other) => other !== reel && setSound(other, false))
+      if (turnOn) {
+        video.currentTime = 0
+        video.play().catch(() => {})
+      }
+      setSound(reel, turnOn)
+    }
+    reel.querySelector('.reel__sound')!.addEventListener('click', (e) => {
+      e.stopPropagation()
+      toggle()
+    })
+    video.addEventListener('click', toggle)
+  })
+</script>
