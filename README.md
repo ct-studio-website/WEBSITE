@@ -1,78 +1,22 @@
-# CT Studio NZ
+# CT Studio NZ website
 
-Professional photography and videography website.
+Website for CT Studio NZ, photography and videography across Christchurch and Canterbury: https://ctstudionz.com
 
-## Local Preview
+## How it's built
 
-Open any .html file in a browser, or for video support:
+- Plain HTML, CSS and JavaScript, with no build step
+- Hosted on Netlify (settings in `netlify.toml`); every push to `main` goes live
+- Photos and videos are hosted on Cloudinary
+- The contact form is handled by Formspree
+- Domain and DNS are at GoDaddy
 
-```bash
-npx serve .
-```
+## Making changes
 
-Then open http://localhost:3000
+Edit locally, commit, and push to `main`. Netlify publishes in about a minute.
 
-## Deploy to Vercel
+## Scripts (optional, need a local `.env`)
 
-```bash
-npm i -g vercel
-vercel
-vercel --prod
-```
+- `npm run generate-config` writes `js/config.js` (booking calendar settings) from `.env`
+- `npm run rebuild-gallery` rebuilds the photo gallery from Cloudinary
 
-## Connect Domain (ctstudionz.com on GoDaddy)
-
-1. Vercel dashboard → Project Settings → Domains → Add `ctstudionz.com` and `www.ctstudionz.com`
-2. GoDaddy DNS → Change nameservers to:
-   - `ns1.vercel-dns.com`
-   - `ns2.vercel-dns.com`
-3. SSL auto-provisions. Wait 10-30 min for DNS.
-
-## Contact Form
-
-Currently static (shows thank-you message, no data sent).
-
-To connect: use Formspree, add `action="https://formspree.io/f/YOUR_ID"` to the form in `contact.html` and remove the `preventDefault` in `js/main.js`.
-
-## Updating Content
-
-- Swap images in `assets/` folders
-- Edit text in the HTML files
-- Redeploy: `vercel --prod`
-
-## Project Structure
-
-```
-ct-studio-nz/
-├── index.html          # Home page
-├── photo.html          # Photo portfolio page
-├── video.html          # Video portfolio page
-├── about.html          # About + Services + Equipment + FAQ
-├── contact.html        # Contact page
-├── css/
-│   └── style.css       # Shared stylesheet
-├── js/
-│   └── main.js         # Shared JavaScript
-├── vercel.json         # Vercel config
-├── package.json        # Package info
-├── README.md           # This file
-└── assets/
-    ├── logo/
-    │   └── logo.png
-    ├── photos/
-    │   ├── studio/
-    │   ├── outdoor/
-    │   ├── events/
-    │   └── business/
-    ├── videos/
-    │   └── hero/
-    │       └── hero-reel.mp4
-    └── home-carousel/
-```
-
-## Tech Stack
-
-- HTML5, CSS3, vanilla JavaScript
-- Google Fonts (Cormorant Garamond, DM Sans)
-- No external dependencies
-- Responsive design (Desktop, Tablet, Mobile)
+Built by SheDecodes (shedecodes.dev)
