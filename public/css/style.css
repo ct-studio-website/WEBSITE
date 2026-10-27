@@ -479,6 +479,7 @@ main {
 .photo-grid__item img {
   width: 100%;
   display: block;
+  height: auto;
   transition:
     transform 0.4s ease,
     box-shadow 0.4s ease;

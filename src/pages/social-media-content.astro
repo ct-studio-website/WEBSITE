@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro'
 import {client, urlFor, getSettings} from '../lib/sanity'
+import {videoSrc as sizedVideo, videoFrame, uploadDate} from '../lib/video'
 
 type Reel = {title: string; url: string; thumbnail?: any}
 type Pkg = {name: string; description?: string; price?: number; priceUnit?: string}
@@ -40,22 +41,8 @@ const showFollow = page.showFollowButton !== false && !!instagram
 const reels = (page.reels ?? []).filter((r) => r?.url)
 const packages = page.packages ?? []
 const faq = (page.faq ?? []).filter((f) => f?.question && f?.answer)
-const isCloudinary = (url: string) => url.includes('res.cloudinary.com') && url.includes('/video/upload/')
-
-// Phone-sized versions from Cloudinary, so a visitor never downloads the full file
-const videoSrc = (r: Reel) =>
-  isCloudinary(r.url) ? r.url.replace('/video/upload/', '/video/upload/w_720,c_limit/q_auto/f_auto/') : r.url
-const poster = (r: Reel) =>
-  r.thumbnail
-    ? urlFor(r.thumbnail).width(540).height(960).fit('crop').url()
-    : isCloudinary(r.url)
-      ? r.url.replace('/video/upload/', '/video/upload/w_540,h_960,c_fill,so_0/').replace(/\.[a-z0-9]+$/i, '.jpg')
-      : undefined
-// Cloudinary links carry the upload time (v + Unix seconds), which Google wants as uploadDate
-const uploadDate = (url: string) => {
-  const m = url.match(/\/v(\d{10})\//)
-  return m ? new Date(Number(m[1]) * 1000).toISOString() : undefined
-}
+const videoSrc = (r: Reel) => sizedVideo(r.url, 720)
+const poster = (r: Reel) => (r.thumbnail ? urlFor(r.thumbnail).width(540).height(960).fit('crop').url() : videoFrame(r.url, 540, 960))
 const price = (p: Pkg) => (p.price ? `From $${p.price.toLocaleString('en-NZ')}${p.priceUnit ? ` ${p.priceUnit}` : ''}` : 'Price on request')
 
 const jsonLd = {
