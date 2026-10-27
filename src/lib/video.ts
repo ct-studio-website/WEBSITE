@@ -1,15 +1,18 @@
 // Helpers for video links hosted on Cloudinary
 const isCloudinary = (url: string) => url.includes('res.cloudinary.com') && url.includes('/video/upload/')
 
+/** Removes any size/quality settings already in a pasted Cloudinary link, so we never add them twice. */
+const clean = (url: string) => url.replace(/\/video\/upload\/(?:[^/]*[_,][^/]*\/)+(v\d+\/)/, '/video/upload/$1')
+
 /** A smaller version of the video, so visitors don't download the full original. */
 export const videoSrc = (url: string, width = 1280) =>
-  isCloudinary(url) ? url.replace('/video/upload/', `/video/upload/w_${width},c_limit/q_auto/f_auto/`) : url
+  isCloudinary(url) ? clean(url).replace('/video/upload/', `/video/upload/w_${width},c_limit/q_auto/f_auto/`) : url
 
 /** A still frame from the video, cropped to the given size. Cloudinary uses the middle frame,
  * which avoids black frames from fade-ins. CT can set his own thumbnail in the Studio instead. */
 export const videoFrame = (url: string, width: number, height: number) =>
   isCloudinary(url)
-    ? url.replace('/video/upload/', `/video/upload/w_${width},h_${height},c_fill/q_auto/`).replace(/\.[a-z0-9]+$/i, '.jpg')
+    ? clean(url).replace('/video/upload/', `/video/upload/w_${width},h_${height},c_fill/q_auto/`).replace(/\.[a-z0-9]+$/i, '.jpg')
     : undefined
 
 /** Cloudinary links carry the upload time (v + Unix seconds), which Google wants as uploadDate. */

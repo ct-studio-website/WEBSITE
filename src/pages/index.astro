@@ -1,193 +1,98 @@
 ---
 import Base from '../layouts/Base.astro'
-import {client} from '../lib/sanity'
+import {client, urlFor, getSettings} from '../lib/sanity'
+import {videoSrc} from '../lib/video'
 
-const home = await client.fetch<{secondLine?: {text?: string; link?: string}} | null>(
-  `*[_type == "homePage"][0]{secondLine}`,
-)
-const secondLine = home?.secondLine
+type Photo = {alt?: string; crop?: unknown; hotspot?: unknown; asset?: {_id: string; metadata?: {dimensions?: {width: number; height: number}}}}
+type Home = {
+  tagline?: string
+  secondLine?: {text?: string; link?: string}
+  heroVideoUrl?: string
+  heroPoster?: Photo
+  carousel?: Photo[]
+  seo?: {title?: string; description?: string}
+}
 
+const home: Home =
+  (await client.fetch(
+    `*[_type == "homePage"][0]{tagline, secondLine, heroVideoUrl, seo,
+      heroPoster{alt, crop, hotspot, asset->{_id}},
+      carousel[]{alt, crop, hotspot, asset->{_id, metadata{dimensions{width, height}}}}}`,
+  )) ?? {}
+const settings = await getSettings()
+
+const tagline = home.tagline ?? 'Photographer & Videographer · Christchurch & Canterbury'
+const poster = home.heroPoster?.asset ? urlFor(home.heroPoster).width(1280).quality(75).url() : undefined
+const carousel = (home.carousel ?? []).filter((p) => p?.asset?._id)
+
+// The carousel strip is 200px tall (150px on phones): ask for 400px for sharp screens
+const slide = (p: Photo) => urlFor(p).height(400).quality(80).url()
+const slideWidth = (p: Photo) => {
+  const d = p.asset?.metadata?.dimensions
+  return d ? Math.round((200 * d.width) / d.height) : undefined
+}
+
+// Business details for Google and AI search, from Site settings
+const name = settings.businessName ?? 'CT Studio NZ'
+const phoneIntl = settings.phone ? '+64 ' + settings.phone.replace(/^0/, '') : undefined
 const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "ProfessionalService",
-  "@id": "https://ctstudionz.com/#business",
-  "name": "CT Studio NZ",
-  "url": "https://ctstudionz.com/",
-  "logo": "https://ctstudionz.com/assets/logo/logo.PNG",
-  "image": "https://ctstudionz.com/IMG_4154.jpg",
-  "description": "Photography and videography studio in Rolleston, with photoshoots across Christchurch and Canterbury, New Zealand.",
-  "email": "ctstudionz89@gmail.com",
-  "telephone": "+64 22 466 3080",
-  "areaServed": [
-    {
-      "@type": "City",
-      "name": "Christchurch"
-    },
-    {
-      "@type": "AdministrativeArea",
-      "name": "Canterbury"
-    }
-  ],
-  "address": {
-    "@type": "PostalAddress",
-    "addressLocality": "Rolleston",
-    "addressRegion": "Canterbury",
-    "addressCountry": "NZ"
-  },
-  "hasMap": "https://maps.google.com/?cid=8282387709924293099",
-  "serviceType": [
-    "Photography",
-    "Videography"
-  ],
-  "sameAs": [
-    "https://www.instagram.com/ct_studio_nz/",
-    "https://www.youtube.com/@ctstudionz",
-    "https://www.facebook.com/ctstudionz"
-  ]
+  '@context': 'https://schema.org',
+  '@type': 'ProfessionalService',
+  '@id': 'https://ctstudionz.com/#business',
+  name,
+  url: 'https://ctstudionz.com/',
+  logo: settings.logo ? urlFor(settings.logo).width(600).url() : 'https://ctstudionz.com/assets/logo/logo.PNG',
+  image: 'https://ctstudionz.com/IMG_4154.jpg',
+  description: `Photography and videography studio in ${settings.studioTown ?? 'Rolleston'}, with photoshoots across ${(settings.areasServed ?? ['Christchurch', 'Canterbury']).join(' and ')}, New Zealand.`,
+  email: settings.email,
+  telephone: phoneIntl,
+  areaServed: (settings.areasServed ?? []).map((area) => ({'@type': 'Place', name: area})),
+  address: {'@type': 'PostalAddress', addressLocality: settings.studioTown ?? 'Rolleston', addressRegion: 'Canterbury', addressCountry: 'NZ'},
+  hasMap: settings.googleProfileUrl,
+  serviceType: ['Photography', 'Videography', 'Social media content'],
+  sameAs: (settings.socialLinks ?? []).map((l) => l.url),
 }
 ---
 
 <Base
-  title="CT Studio NZ | Photography & Videography"
-  description="CT Studio NZ - Professional Photography and Videography in Christchurch, New Zealand. Capturing moments, stories, and brands with elegance and creativity."
+  title={home.seo?.title ?? 'CT Studio NZ | Photography & Videography'}
+  description={home.seo?.description ??
+    'CT Studio NZ - Professional Photography and Videography in Christchurch, New Zealand. Capturing moments, stories, and brands with elegance and creativity.'}
   path="/"
   active="home"
-  ogDescription="Professional photography and videography in Christchurch, New Zealand. Capturing moments, stories, and brands with elegance and creativity."
-  twitterDescription="Professional photography and videography in Christchurch, New Zealand."
   jsonLd={jsonLd}
 >
   <main>
-      <!-- Hero Section -->
-      <section class="hero">
+    <section class="hero">
+      {home.heroVideoUrl && (
         <div class="hero__video fade-in">
-          <video autoplay muted loop playsinline poster="https://res.cloudinary.com/dibcmlyg0/video/upload/w_1280,c_limit,so_0/q_auto/f_auto/v1781407692/new_version_fq0qus.jpg">
-            <source
-              src="https://res.cloudinary.com/dibcmlyg0/video/upload/w_1280,c_limit/q_auto/f_auto/v1781407692/new_version_fq0qus.mp4"
-              type="video/mp4"
-            />
+          <video autoplay muted loop playsinline poster={poster}>
+            <source src={videoSrc(home.heroVideoUrl)} type="video/mp4" />
             Your browser does not support the video tag.
           </video>
         </div>
+      )}
 
-        <h1 class="hero__tagline fade-in">
-          Photographer &amp; Videographer · Christchurch &amp; Canterbury
-        </h1>
-        {secondLine?.text && (
-          <p class="hero__subline fade-in">
-            {secondLine.link ? <a href={secondLine.link}>{secondLine.text}</a> : secondLine.text}
-          </p>
-        )}
-      </section>
+      <h1 class="hero__tagline fade-in">{tagline}</h1>
+      {home.secondLine?.text && (
+        <p class="hero__subline fade-in">
+          {home.secondLine.link ? <a href={home.secondLine.link}>{home.secondLine.text}</a> : home.secondLine.text}
+        </p>
+      )}
+    </section>
 
-      <!-- Carousel Strip -->
+    {carousel.length > 0 && (
       <section class="carousel-strip">
         <div class="carousel-strip__track">
-          <img
-            class="carousel-strip__image"
-            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696448/carousel-8_sd9poh.jpg"
-            alt="Couple portrait in warm golden light"
-            loading="lazy"
-          />
-          <img
-            class="carousel-strip__image"
-            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1788562843/CT_05868_sjf91q.jpg"
-            alt="Studio portrait of a woman seated on a tall stool"
-            loading="lazy"
-          />
-          <img
-            class="carousel-strip__image"
-            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696413/carousel-6_sri3y9.jpg"
-            alt="Portrait of a young woman reading a book"
-            loading="lazy"
-          />
-          <img
-            class="carousel-strip__image"
-            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696371/carousel-5_a1oeoi.jpg"
-            alt="Portrait of a woman in soft natural light"
-            loading="lazy"
-          />
-          <img
-            class="carousel-strip__image"
-            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696338/carousel-4_k2qys2.jpg"
-            alt="Couple portrait outdoors among greenery"
-            loading="lazy"
-          />
-          <img
-            class="carousel-strip__image"
-            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696328/carousel-3_ylmgyg.jpg"
-            alt="Portrait of a woman in a white dress"
-            loading="lazy"
-          />
-          <img
-            class="carousel-strip__image"
-            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696278/carousel-2_lb3fte.jpg"
-            alt="Family portrait of a woman holding a smiling toddler outdoors under golden leaves"
-            loading="lazy"
-          />
-          <img
-            class="carousel-strip__image"
-            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696153/carousel-1_qvozye.webp"
-            alt="Portrait of a woman against a deep red background"
-            loading="lazy"
-          />
-          <!-- Duplicate for seamless loop -->
-          <img
-            class="carousel-strip__image"
-            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696448/carousel-8_sd9poh.jpg"
-            alt=""
-            aria-hidden="true"
-            loading="lazy"
-          />
-          <img
-            class="carousel-strip__image"
-            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1788562843/CT_05868_sjf91q.jpg"
-            alt=""
-            aria-hidden="true"
-            loading="lazy"
-          />
-          <img
-            class="carousel-strip__image"
-            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696413/carousel-6_sri3y9.jpg"
-            alt=""
-            aria-hidden="true"
-            loading="lazy"
-          />
-          <img
-            class="carousel-strip__image"
-            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696371/carousel-5_a1oeoi.jpg"
-            alt=""
-            aria-hidden="true"
-            loading="lazy"
-          />
-          <img
-            class="carousel-strip__image"
-            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696338/carousel-4_k2qys2.jpg"
-            alt=""
-            aria-hidden="true"
-            loading="lazy"
-          />
-          <img
-            class="carousel-strip__image"
-            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696328/carousel-3_ylmgyg.jpg"
-            alt=""
-            aria-hidden="true"
-            loading="lazy"
-          />
-          <img
-            class="carousel-strip__image"
-            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696278/carousel-2_lb3fte.jpg"
-            alt=""
-            aria-hidden="true"
-            loading="lazy"
-          />
-          <img
-            class="carousel-strip__image"
-            src="https://res.cloudinary.com/dibcmlyg0/image/upload/h_400,c_limit/q_auto/f_auto/v1779696153/carousel-1_qvozye.webp"
-            alt=""
-            aria-hidden="true"
-            loading="lazy"
-          />
+          {carousel.map((p) => (
+            <img class="carousel-strip__image" src={slide(p)} alt={p.alt ?? 'Portfolio image'} loading="lazy" width={slideWidth(p)} height="200" />
+          ))}
+          {/* Second copy for the seamless loop, hidden from screen readers */}
+          {carousel.map((p) => (
+            <img class="carousel-strip__image" src={slide(p)} alt="" aria-hidden="true" loading="lazy" width={slideWidth(p)} height="200" />
+          ))}
         </div>
       </section>
-    </main>
+    )}
+  </main>
 </Base>
