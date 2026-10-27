@@ -1,343 +1,154 @@
 ---
 import Base from '../layouts/Base.astro'
+import PortableText from '../components/PortableText.astro'
+import {client, urlFor} from '../lib/sanity'
+import {serviceIcon, equipmentIcons} from '../lib/icons'
+
+type Service = {name: string; intro?: string; items?: string[]; closingLine?: string; priceFrom?: number}
+type Equipment = {name: string; description?: string; icon?: string}
+type Faq = {question: string; answer: string}
+type Photo = {alt?: string; crop?: unknown; hotspot?: unknown; asset?: {_id: string; metadata?: {dimensions?: {width: number; height: number}}}}
+type About = {
+  heading?: string
+  description?: any[]
+  servicesHeading?: string
+  services?: Service[]
+  equipmentHeading?: string
+  equipmentIntro?: string
+  equipment?: Equipment[]
+  equipmentClosing?: string
+  images?: Photo[]
+  faqHeading?: string
+  faq?: Faq[]
+  seo?: {title?: string; description?: string}
+}
+
+const page: About =
+  (await client.fetch(
+    `*[_type == "aboutPage"][0]{heading, description, servicesHeading, services, equipmentHeading, equipmentIntro,
+      equipment, equipmentClosing, faqHeading, faq, seo,
+      images[]{alt, crop, hotspot, asset->{_id, metadata{dimensions{width, height}}}}}`,
+  )) ?? {}
+
+const services = (page.services ?? []).filter((s) => s?.name)
+const equipment = (page.equipment ?? []).filter((e) => e?.name)
+const images = (page.images ?? []).filter((p) => p?.asset?._id)
+const faq = (page.faq ?? []).filter((f) => f?.question && f?.answer)
+const size = (p: Photo, w: number) => {
+  const d = p.asset?.metadata?.dimensions
+  return d ? {width: w, height: Math.round((w * d.height) / d.width)} : {}
+}
+
+// The FAQ as structured data, so Google and AI tools can quote the answers
+const jsonLd = faq.length
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: faq.map((f) => ({'@type': 'Question', name: f.question, acceptedAnswer: {'@type': 'Answer', text: f.answer}})),
+    }
+  : undefined
 ---
 
 <Base
-  title="About | CT Studio NZ"
-  description="About CT Studio NZ - Professional photography and videography services, equipment, and frequently asked questions."
+  title={page.seo?.title ?? 'About | CT Studio NZ'}
+  description={page.seo?.description ??
+    'About CT Studio NZ - Professional photography and videography services, equipment, and frequently asked questions.'}
   path="/about"
   active="about"
+  jsonLd={jsonLd}
 >
   <main>
-      <!-- Welcome Section -->
-      <section class="section section--alt">
-        <div class="container">
-          <div class="welcome-section text-center">
-            <h1 class="fade-in">Welcome to CT Studio NZ</h1>
-            <div class="divider"></div>
-            <p class="fade-in">
-              At CT Studio NZ, we turn moments, stories, and brands into
-              timeless visual experiences.
-            </p>
-            <p class="fade-in">
-              We specialize in professional photography and cinematic
-              videography that captures emotion, identity, and purpose. Whether
-              you are building your personal brand, celebrating a family
-              milestone, promoting your business, or preserving unforgettable
-              memories, we are here to bring your vision to life with creativity
-              and professionalism.
-            </p>
-            <p class="fade-in">
-              From studio portraits and family events to promotional business
-              videos and high-quality social media content, CT Studio NZ
-              delivers visuals that make a lasting impression.
-            </p>
-            <p class="fade-in">
-              <strong>Your story deserves to be seen beautifully.</strong>
-            </p>
-          </div>
+    <section class="section section--alt">
+      <div class="container">
+        <div class="welcome-section text-center">
+          <h1 class="fade-in">{page.heading ?? 'Welcome to CT Studio NZ'}</h1>
+          <div class="divider"></div>
+          <div class="fade-in"><PortableText value={page.description} /></div>
         </div>
-      </section>
+      </div>
+    </section>
 
-      <!-- Services Section -->
+    {services.length > 0 && (
       <section class="section">
         <div class="container">
-          <h2 class="text-center fade-in">Our Services</h2>
+          <h2 class="text-center fade-in">{page.servicesHeading ?? 'Our Services'}</h2>
           <div class="divider"></div>
           <div class="services-grid">
-            <!-- Studio Card -->
-            <div class="service-card fade-in">
-              <div class="service-card__icon">
-                <svg viewBox="0 0 24 24">
-                  <path
-                    d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
-                  />
-                  <circle cx="12" cy="13" r="4" />
-                </svg>
+            {services.map((s, i) => (
+              <div class="service-card fade-in">
+                <div class="service-card__icon" set:html={serviceIcon(s.name, i)} />
+                <h3>{s.name}</h3>
+                {s.intro && <p class="service-card__lead">{s.intro}</p>}
+                {(s.items?.length ?? 0) > 0 && <ul class="service-card__list">{s.items!.map((item) => <li>{item}</li>)}</ul>}
+                {s.priceFrom && <p class="service-card__lead">From ${s.priceFrom.toLocaleString('en-NZ')}</p>}
+                {s.closingLine && <p class="service-card__footer">{s.closingLine}</p>}
               </div>
-              <h3>Indoor Studio</h3>
-              <p class="service-card__lead">
-                It's time to build your personal brand and preserve your most
-                valuable memories.
-              </p>
-              <ul class="service-card__list">
-                <li>Passport photos</li>
-                <li>Portraits</li>
-                <li>Newborn</li>
-                <li>Fashion</li>
-                <li>Professional LinkedIn headshots</li>
-                <li>Business owner branding portraits</li>
-                <li>Corporate profile photos</li>
-                <li>Family studio portraits</li>
-                <li>Couple photography</li>
-                <li>Creative themed shoots</li>
-              </ul>
-              <p class="service-card__footer">
-                A strong image creates a strong first impression.
-              </p>
-            </div>
-
-            <!-- Outdoor -->
-            <div class="service-card fade-in">
-              <div class="service-card__icon">
-                <svg viewBox="0 0 24 24">
-                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
-                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
-                </svg>
-              </div>
-              <h3>Outdoor</h3>
-              <p class="service-card__lead">
-                We turn every outdoor session into a memorable story.
-              </p>
-              <ul class="service-card__list">
-                <li>Family portraits</li>
-                <li>Maternity</li>
-                <li>Individual portraits</li>
-              </ul>
-              <p class="service-card__footer">
-                Our goal is to capture genuine movements and turn them into
-                timeless memories you can cherish forever.
-              </p>
-            </div>
-
-            <!-- Events Card -->
-            <div class="service-card fade-in">
-              <div class="service-card__icon">
-                <svg viewBox="0 0 24 24">
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                  <line x1="16" y1="2" x2="16" y2="6" />
-                  <line x1="8" y1="2" x2="8" y2="6" />
-                  <line x1="3" y1="10" x2="21" y2="10" />
-                </svg>
-              </div>
-              <h3>Events</h3>
-              <p class="service-card__lead">
-                We professionally cover a wide range of events.
-              </p>
-              <ul class="service-card__list">
-                <li>Weddings</li>
-                <li>Birthdays</li>
-                <li>Engagements</li>
-                <li>Family celebrations</li>
-                <li>Cultural events</li>
-                <li>Stage shows and performances</li>
-                <li>Community and social gatherings</li>
-              </ul>
-              <p class="service-card__footer">
-                We capture every important detail so you can relive the moment
-                forever.
-              </p>
-            </div>
-
-            <!-- Business Card -->
-            <div class="service-card fade-in">
-              <div class="service-card__icon">
-                <svg viewBox="0 0 24 24">
-                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
-                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
-                </svg>
-              </div>
-              <h3>Business</h3>
-              <p class="service-card__lead">
-                Helping businesses grow through professional visual content.
-              </p>
-              <ul class="service-card__list">
-                <li>Promotional videos</li>
-                <li>Brand storytelling</li>
-                <li>Portfolio shoots</li>
-                <li>Client testimonials</li>
-                <li>Corporate event coverage</li>
-                <li>Social media marketing content</li>
-              </ul>
-              <p class="service-card__footer">
-                We have proudly worked with professionals such as mortgage
-                brokers and other business owners to enhance their brand
-                presence and support business growth.
-              </p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
+    )}
 
-      <!-- Equipment Section -->
+    {(equipment.length > 0 || images.length > 0) && (
       <section class="section section--alt">
-        <div class="container text-center">
-          <h2 class="fade-in">Our Equipment</h2>
-          <div class="divider"></div>
-          <p class="page-header__subtitle fade-in">
-            We are fully equipped to take your vision to the next level.
-          </p>
-          <div class="equipment-grid fade-in">
-            <div class="equipment-item">
-              <svg viewBox="0 0 24 24">
-                <path
-                  d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
-                />
-                <circle cx="12" cy="13" r="4" />
-              </svg>
-              <span>High-resolution cameras</span>
+        {equipment.length > 0 && (
+          <div class="container text-center">
+            <h2 class="fade-in">{page.equipmentHeading ?? 'Our Equipment'}</h2>
+            <div class="divider"></div>
+            {page.equipmentIntro && <p class="page-header__subtitle fade-in">{page.equipmentIntro}</p>}
+            <div class="equipment-grid fade-in">
+              {equipment.map((e) => (
+                <div class="equipment-item">
+                  <Fragment set:html={equipmentIcons[e.icon ?? 'other'] ?? equipmentIcons.other} />
+                  <span>{e.name}</span>
+                  {e.description && <small>{e.description}</small>}
+                </div>
+              ))}
             </div>
-            <div class="equipment-item">
-              <svg viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="10" />
-                <circle cx="12" cy="12" r="6" />
-                <circle cx="12" cy="12" r="2" />
-              </svg>
-              <span>Premium lenses</span>
-            </div>
-            <div class="equipment-item">
-              <svg viewBox="0 0 24 24">
-                <path
-                  d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"
-                />
-              </svg>
-              <span>Professional studio lighting</span>
-            </div>
-            <div class="equipment-item">
-              <svg viewBox="0 0 24 24">
-                <rect x="3" y="3" width="18" height="18" rx="2" />
-                <line x1="3" y1="9" x2="21" y2="9" />
-                <line x1="9" y1="21" x2="9" y2="9" />
-              </svg>
-              <span>Backdrops</span>
-            </div>
-            <div class="equipment-item">
-              <svg viewBox="0 0 24 24">
-                <path
-                  d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
-                />
-              </svg>
-              <span>Drone photography and videography</span>
-            </div>
-            <div class="equipment-item">
-              <svg viewBox="0 0 24 24">
-                <path
-                  d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"
-                />
-                <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-                <line x1="12" y1="19" x2="12" y2="23" />
-                <line x1="8" y1="23" x2="16" y2="23" />
-              </svg>
-              <span>Audio recording equipment</span>
-            </div>
-            <div class="equipment-item">
-              <svg viewBox="0 0 24 24">
-                <rect x="2" y="6" width="20" height="12" rx="2" />
-                <path d="M12 12m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
-                <path d="M6 12h2M16 12h2" />
-              </svg>
-              <span>Video stabilization gear</span>
-            </div>
+            {page.equipmentClosing && <p class="equipment-footer fade-in">{page.equipmentClosing}</p>}
           </div>
-          <p class="equipment-footer fade-in">
-            Using the right tools ensures exceptional quality every time.
-          </p>
-        </div>
+        )}
 
-        <br />
-
-        <div class="photo-studio fade-in">
-          <!-- Studio Photo -->
-          <div class="photo-gridstudio__item" data-category="studio">
-            <img src="/IMG_4154.jpg" alt="Studio photography" loading="lazy" />
-          </div>
-        </div>
+        {images.length > 0 && (
+          <>
+            <br />
+            <div class="photo-studio fade-in">
+              {images.map((p) => (
+                <div class="photo-gridstudio__item">
+                  <img
+                    src={urlFor(p).width(1200).quality(80).url()}
+                    srcset={[600, 900, 1200, 1800].map((w) => `${urlFor(p).width(w).quality(80).url()} ${w}w`).join(', ')}
+                    sizes="(max-width: 1200px) 100vw, 1200px"
+                    alt={p.alt ?? 'CT Studio NZ'}
+                    loading="lazy"
+                    {...size(p, 1200)}
+                  />
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </section>
+    )}
 
-      <!-- FAQ Section -->
+    {faq.length > 0 && (
       <section class="section">
         <div class="container">
-          <h2 class="text-center fade-in">Frequently Asked Questions</h2>
+          <h2 class="text-center fade-in">{page.faqHeading ?? 'Frequently Asked Questions'}</h2>
           <div class="divider"></div>
           <div class="faq-list fade-in">
-            <div class="faq-item">
-              <div
-                class="faq-question"
-                role="button"
-                tabindex="0"
-                aria-expanded="false"
-              >
-                <h4>What services do you offer?</h4>
-                <div class="faq-toggle" aria-hidden="true"></div>
+            {faq.map((f) => (
+              <div class="faq-item">
+                <div class="faq-question" role="button" tabindex="0" aria-expanded="false">
+                  <h4>{f.question}</h4>
+                  <div class="faq-toggle" aria-hidden="true"></div>
+                </div>
+                <div class="faq-answer"><p>{f.answer}</p></div>
               </div>
-              <div class="faq-answer">
-                <p>
-                  We offer professional photography, videography, studio
-                  portraits, event coverage, drone services, and business
-                  promotional content.
-                </p>
-              </div>
-            </div>
-            <div class="faq-item">
-              <div
-                class="faq-question"
-                role="button"
-                tabindex="0"
-                aria-expanded="false"
-              >
-                <h4>Do you travel for events?</h4>
-                <div class="faq-toggle" aria-hidden="true"></div>
-              </div>
-              <div class="faq-answer">
-                <p>
-                  Yes, we provide on-location services across Christchurch and
-                  surrounding areas.
-                </p>
-              </div>
-            </div>
-            <div class="faq-item">
-              <div
-                class="faq-question"
-                role="button"
-                tabindex="0"
-                aria-expanded="false"
-              >
-                <h4>How long does it take to receive photos/videos?</h4>
-                <div class="faq-toggle" aria-hidden="true"></div>
-              </div>
-              <div class="faq-answer">
-                <p>
-                  Delivery times depend on the project, but most standard
-                  sessions are delivered within 5–10 working days.
-                </p>
-              </div>
-            </div>
-            <div class="faq-item">
-              <div
-                class="faq-question"
-                role="button"
-                tabindex="0"
-                aria-expanded="false"
-              >
-                <h4>Do you provide edited photos and videos?</h4>
-                <div class="faq-toggle" aria-hidden="true"></div>
-              </div>
-              <div class="faq-answer">
-                <p>
-                  Yes, all final content is professionally edited to ensure the
-                  highest quality.
-                </p>
-              </div>
-            </div>
-            <div class="faq-item">
-              <div
-                class="faq-question"
-                role="button"
-                tabindex="0"
-                aria-expanded="false"
-              >
-                <h4>Can you create social media reels?</h4>
-                <div class="faq-toggle" aria-hidden="true"></div>
-              </div>
-              <div class="faq-answer">
-                <p>
-                  Absolutely. We specialize in creating Instagram, Facebook, and
-                  TikTok-ready reels.
-                </p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
-    </main>
+    )}
+  </main>
 </Base>

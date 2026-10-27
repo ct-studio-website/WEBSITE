@@ -1,0 +1,58 @@
+---
+// Renders Sanity rich text: paragraphs, headings, bullet lists, bold, italic and links.
+type Span = {_type: 'span'; _key?: string; text: string; marks?: string[]}
+type Block = {
+  _type: string
+  _key?: string
+  style?: string
+  listItem?: string
+  children?: Span[]
+  markDefs?: {_key: string; _type: string; href?: string}[]
+}
+interface Props {
+  value?: Block[]
+}
+const blocks = (Astro.props.value ?? []).filter((b) => b._type === 'block')
+
+// Group list items so they render inside one <ul>
+type Group = {list: true; items: Block[]} | {list: false; block: Block}
+const groups: Group[] = []
+for (const b of blocks) {
+  const last = groups.at(-1)
+  if (b.listItem) {
+    if (last?.list) last.items.push(b)
+    else groups.push({list: true, items: [b]})
+  } else groups.push({list: false, block: b})
+}
+
+const escape = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+const inline = (b: Block) =>
+  (b.children ?? [])
+    .map((span) => {
+      let html = escape(span.text ?? '')
+      for (const mark of span.marks ?? []) {
+        if (mark === 'strong') html = `<strong>${html}</strong>`
+        else if (mark === 'em') html = `<em>${html}</em>`
+        else {
+          const def = b.markDefs?.find((d) => d._key === mark)
+          if (def?.href) {
+            const external = /^https?:\/\//.test(def.href)
+            html = `<a href="${escape(def.href)}"${external ? ' target="_blank" rel="noopener noreferrer"' : ''}>${html}</a>`
+          }
+        }
+      }
+      return html
+    })
+    .join('')
+const tag = (style?: string) => (style && /^h[2-4]$/.test(style) ? style : 'p')
+---
+{groups.map((g) =>
+  g.list ? (
+    <ul>{g.items.map((item) => <li set:html={inline(item)} />)}</ul>
+  ) : (
+    (() => {
+      const Tag = tag(g.block.style)
+      return <Tag set:html={inline(g.block)} />
+    })()
+  ),
+)}

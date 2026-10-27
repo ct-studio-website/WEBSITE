@@ -1,14 +1,20 @@
 ---
 import Base from '../layouts/Base.astro'
 import SocialIcons from '../components/SocialIcons.astro'
-import {getSettings, telHref, joinAreas} from '../lib/sanity'
+import {client, getSettings, telHref, joinAreas} from '../lib/sanity'
 
 const settings = await getSettings()
+const page =
+  (await client.fetch<{heading?: string; intro?: string; formServices?: string[]; thankYouMessage?: string; seo?: {title?: string; description?: string}} | null>(
+    `*[_type == "contactPage"][0]{heading, intro, formServices, thankYouMessage, seo}`,
+  )) ?? {}
+const options = page.formServices?.length ? page.formServices : ['Photography', 'Videography', 'Both', 'Other']
+const optionValue = (o: string) => o.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 ---
 
 <Base
-  title="Contact | CT Studio NZ"
-  description="Contact CT Studio NZ - Get in touch for professional photography and videography services in Christchurch, New Zealand."
+  title={page.seo?.title ?? 'Contact | CT Studio NZ'}
+  description={page.seo?.description ?? `Contact CT Studio NZ - Get in touch for professional photography and videography services in Christchurch, New Zealand.`}
   path="/contact"
   active="contact"
   ogTitle="Contact CT Studio NZ | Photography & Videography"
@@ -19,7 +25,8 @@ const settings = await getSettings()
       <!-- Contact Section -->
       <section class="section section--alt">
         <div class="container">
-          <h1 class="text-center fade-in">Get in Touch</h1>
+          <h1 class="text-center fade-in">{page.heading ?? 'Get in Touch'}</h1>
+          {page.intro && <p class="page-header__subtitle text-center fade-in">{page.intro}</p>}
           <div class="divider"></div>
           <div class="contact-grid">
             <form
@@ -44,10 +51,7 @@ const settings = await getSettings()
                 <label for="service">Service interested in</label>
                 <select id="service" name="service">
                   <option value="">Select a service</option>
-                  <option value="photography">Photography</option>
-                  <option value="videography">Videography</option>
-                  <option value="both">Both</option>
-                  <option value="other">Other</option>
+                  {options.map((o) => <option value={optionValue(o)}>{o}</option>)}
                 </select>
               </div>
               <div class="form-group">
@@ -72,6 +76,6 @@ const settings = await getSettings()
     </main>
 
   <Fragment slot="overlays">
-    <div class="toast" id="toast">Thank you! We'll be in touch soon.</div>
+    <div class="toast" id="toast">{page.thankYouMessage ?? "Thank you! We'll be in touch soon."}</div>
   </Fragment>
 </Base>
