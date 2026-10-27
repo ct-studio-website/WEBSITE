@@ -78,8 +78,9 @@ async function fetchBusySlots(date) {
   if (!CAL_CONFIG.API_KEY || CAL_CONFIG.API_KEY === 'YOUR_GOOGLE_CALENDAR_API_KEY') {
     await new Promise(r => setTimeout(r, 400)); // simulate network
     state.loadingSlots = false;
-    // Demo: randomly block a couple of hours for demonstration
-    state.busyHours = [10, 14];
+    // No calendar connected yet: show every slot as open.
+    // CT confirms the real time over WhatsApp.
+    state.busyHours = [];
     renderCalendar();
     return;
   }
