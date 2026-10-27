@@ -4,19 +4,23 @@ Website for CT Studio NZ, photography and videography across Christchurch and Ca
 
 ## How it's built
 
-- Plain HTML, CSS and JavaScript, with no build step
-- Hosted on Netlify (settings in `netlify.toml`); every push to `main` goes live
-- Photos and videos are hosted on Cloudinary
-- The contact form is handled by Formspree
-- Domain and DNS are at GoDaddy
+- [Astro](https://astro.build) static site: `src/layouts/Base.astro` holds the shared head, header, footer and booking panel; each page is in `src/pages/`
+- Static files (CSS, JS, logo, robots.txt, sitemap) are in `public/` and are copied to the site as they are
+- Content is being moved to Sanity (Studio: `studio-ct-studio-website-nz`, project `gds6oj8v`)
+- Hosted on Netlify, which runs `npm run build` and publishes `dist/` (settings in `netlify.toml`)
+- Photos and videos are hosted on Cloudinary; the contact form is handled by Formspree; domain and DNS are at GoDaddy
 
-## Making changes
+## Working on it
 
-Edit locally, commit, and push to `main`. Netlify publishes in about a minute.
+```
+npm install
+npm run dev       # http://localhost:4321
+npm run build     # builds the site into dist/
+npm run preview   # serves the built site to check it
+```
 
-## Scripts (optional, need a local `.env`)
+Pages keep the same addresses as before (`/photo` is built as `photo.html`).
 
-- `npm run generate-config` writes `js/config.js` (booking calendar settings) from `.env`
-- `npm run rebuild-gallery` rebuilds the photo gallery from Cloudinary
+Every push to `main` triggers a Netlify deploy, which uses build credits, so batch changes and push rarely.
 
 Built by SheDecodes (shedecodes.dev)
